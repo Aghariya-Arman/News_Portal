@@ -280,13 +280,17 @@ class UserController extends Controller
     }
     public function Adminmsg(Request $request)
     {
+
         $user_id = $request->input('id');
         $login_id = Auth::user()->id;
 
-        $recieved = Message::where('receiver_id', $user_id)->Where('sender_id', $login_id)->get();
-        $sender = Message::where('receiver_id', $login_id)->Where('sender_id', $user_id)->get();
+
+        $recieved = Message::where('receiver_id', $login_id)->Where('sender_id', $user_id)->get();
+        $sender = Message::where('receiver_id', $user_id)->Where('sender_id', $login_id)->get();
+
 
         $allmessage = $recieved->concat($sender)->sortBy('created_at')->values();
+        // dd($allmessage);
 
         return response()->json([
             'data' => [

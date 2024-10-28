@@ -181,32 +181,33 @@
             fetchMessages(id);
         });
 
-        let lastMessageId = null;
+        let lastAdminMessageId = null; // Keep track of the last message ID for admin
 
-        function fetchMessage(userId) {
+        function fetchMessages(userId) {
             $.ajax({
                 type: "POST",
-                url: "{{ route('usershowchat') }}",
+                url: "{{ route('Adminsendmessage') }}",
                 data: {
                     id: userId,
                     _token: "{{ csrf_token() }}"
                 },
                 success: function(response) {
-                    const newMessages = response.data.allmessages.filter(function(message) {
-                        return message.id > lastMessageId;
+
+                    const newMessages = response.data.allmessage.filter(function(message) {
+                        return message.id > lastAdminMessageId;
                     });
 
+                    // Append only new messages
                     newMessages.forEach(function(message) {
-                        const selectClass = (message.sender_id == userId) ? 'received' :
-                            'sent';
-
+                        const finalClass = (message.receiver_id == userId) ? 'sent' :
+                            'received';
                         $('.messages').append(
-                            `<div class="message ${selectClass}">
+                            `<div class="message ${finalClass}">
                         <div class="message-content">${message.message}</div>
                     </div>`
                         );
 
-                        lastMessageId = message.id; // Update the last message ID
+                        lastAdminMessageId = message.id;
                     });
                 },
                 error: function(xhr) {
@@ -214,48 +215,11 @@
                 }
             });
         }
-
         setInterval(function() {
             if (selectedUserId) {
-                fetchMessage(selectedUserId);
+                fetchMessages(selectedUserId);
             }
         }, 1000);
-        // function fetchMessages(userId) {
-        //     $('.message-content-send').empty();
-        //     $('.message-content').empty();
-
-        //     $.ajax({
-        //         type: "POST",
-        //         url: "{{ route('Adminsendmessage') }}",
-        //         data: {
-        //             id: userId,
-        //             _token: "{{ csrf_token() }}"
-        //         },
-        //         success: function(response) {
-        //             // console.log(response.data.allmessage);
-
-        //             $('.messages').empty();
-        //             response.data.allmessage.forEach(function(message) {
-        //                 const finalclass = (message.receiver_id == userId) ? 'received' :
-        //                     'sent';
-        //                 $('.messages').append(
-        //                     `<div class="message ${finalclass}">
-        //                     <div class="message-content">${message.message}</div>
-        //                 </div>`
-        //                 );
-        //             });
-        //         },
-        //         error: function(xhr) {
-        //             console.log(xhr.responseText);
-        //         }
-        //     });
-        // }
-
-        // setInterval(function() {
-        //     if (selectedUserId) {
-        //         fetchMessages(selectedUserId);
-        //     }
-        // }, 10000);
 
         $('.sendmsg').click(function() {
 
