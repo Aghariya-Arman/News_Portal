@@ -173,15 +173,16 @@
 <script>
     $(document).ready(function() {
         let selectedUserId = null;
+        let lastAdminMessageId = null;
+
         $('.contact-name').click(function() {
             var id = $(this).val();
-            $('.sendmsg').data('user-id', id);
-
             selectedUserId = id;
+            lastAdminMessageId = null;
+            $('.messages').empty();
+            $('.sendmsg').data('user-id', id);
             fetchMessages(id);
         });
-
-        let lastAdminMessageId = null; // Keep track of the last message ID for admin
 
         function fetchMessages(userId) {
             $.ajax({
@@ -197,7 +198,7 @@
                         return message.id > lastAdminMessageId;
                     });
 
-                    // Append only new messages
+
                     newMessages.forEach(function(message) {
                         const finalClass = (message.receiver_id == userId) ? 'sent' :
                             'received';
