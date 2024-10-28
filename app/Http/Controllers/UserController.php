@@ -109,7 +109,7 @@ class UserController extends Controller
                 return redirect()->route('ulogin')->with('error', 'Invalid username or password');
             }
         } else {
-            return redirect()->route('otp')->with('error', 'Invalid   ');
+            return redirect()->route('otp')->with('error', 'Invalid  OTP ');
         }
     }
 
