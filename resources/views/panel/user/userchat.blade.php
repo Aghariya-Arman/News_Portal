@@ -182,10 +182,9 @@
         });
 
 
-        function fetchmessage(userId) {
-            $('.message-content').empty();
-            $('.message-content').empty();
+        let lastMessageId = null;
 
+        function fetchMessage(userId) {
             $.ajax({
                 type: "POST",
                 url: "{{ route('usershowchat') }}",
@@ -194,28 +193,22 @@
                     _token: "{{ csrf_token() }}"
                 },
                 success: function(response) {
-                    $('.messages').empty();
-                    // console.log(response.data.allmessages);
-                    response.data.allmessages.forEach(function(message) {
+                    const newMessages = response.data.allmessages.filter(function(message) {
+                        return message.id > lastMessageId;
+                    });
 
-                        const selectclass = (message.sender_id == userId) ? 'sent' :
+                    newMessages.forEach(function(message) {
+                        const selectClass = (message.sender_id == userId) ? 'sent' :
                             'received';
 
                         $('.messages').append(
-                            `<div class="message ${selectclass}">
-                            <div class="message-content">${message.message}</div>
-                        </div>`
+                            `<div class="message ${selectClass}">
+                        <div class="message-content">${message.message}</div>
+                    </div>`
                         );
+
+                        lastMessageId = message.id; // Update the last message ID
                     });
-
-                    // response.data.sender.forEach(function(message) {
-                    //     $('.messages').append(
-                    //         `<div class="message sent">
-                    //         <div class="message-content">${message.message}</div>
-                    //     </div>`
-                    //     );
-                    // });
-
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
@@ -225,9 +218,46 @@
 
         setInterval(function() {
             if (selectedUserId) {
-                fetchmessage(selectedUserId);
+                fetchMessage(selectedUserId);
             }
-        }, 10000);
+        }, 1000);
+        // function fetchmessage(userId) {
+        //     $('.message-content').empty();
+        //     $('.message-content').empty();
+
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "{{ route('usershowchat') }}",
+        //         data: {
+        //             id: userId,
+        //             _token: "{{ csrf_token() }}"
+        //         },
+        //         success: function(response) {
+        //             $('.messages').empty();
+        //             // console.log(response.data.allmessages);
+        //             response.data.allmessages.forEach(function(message) {
+
+        //                 const selectclass = (message.sender_id == userId) ? 'sent' :
+        //                     'received';
+
+        //                 $('.messages').append(
+        //                     `<div class="message ${selectclass}">
+        //                     <div class="message-content">${message.message}</div>
+        //                 </div>`
+        //                 );
+        //             });
+        //         },
+        //         error: function(xhr) {
+        //             console.log(xhr.responseText);
+        //         }
+        //     });
+        // }
+
+        // setInterval(function() {
+        //     if (selectedUserId) {
+        //         fetchmessage(selectedUserId);
+        //     }
+        // }, 10000);
 
 
         $('.sendmsg').click(function() {

@@ -181,39 +181,33 @@
             fetchMessages(id);
         });
 
-        function fetchMessages(userId) {
-            $('.message-content-send').empty();
-            $('.message-content').empty();
+        let lastMessageId = null;
 
+        function fetchMessage(userId) {
             $.ajax({
                 type: "POST",
-                url: "{{ route('Adminsendmessage') }}",
+                url: "{{ route('usershowchat') }}",
                 data: {
                     id: userId,
                     _token: "{{ csrf_token() }}"
                 },
                 success: function(response) {
-                    // console.log(response.data.allmessage);
-
-                    $('.messages').empty();
-                    response.data.allmessage.forEach(function(message) {
-                        const finalclass = (message.receiver_id == userId) ? 'received' :
-                            'sent';
-                        $('.messages').append(
-                            `<div class="message ${finalclass}">
-                            <div class="message-content">${message.message}</div>
-                        </div>`
-                        );
+                    const newMessages = response.data.allmessages.filter(function(message) {
+                        return message.id > lastMessageId;
                     });
 
-                    // response.data.sender.forEach(function(message) {
-                    //     $('.messages').append(
-                    //         `<div class="message received">
-                    //         <div class="message-content">${message.message}</div>
-                    //     </div>`
-                    //     );
-                    // });
+                    newMessages.forEach(function(message) {
+                        const selectClass = (message.sender_id == userId) ? 'received' :
+                            'sent';
 
+                        $('.messages').append(
+                            `<div class="message ${selectClass}">
+                        <div class="message-content">${message.message}</div>
+                    </div>`
+                        );
+
+                        lastMessageId = message.id; // Update the last message ID
+                    });
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
@@ -223,9 +217,45 @@
 
         setInterval(function() {
             if (selectedUserId) {
-                fetchMessages(selectedUserId);
+                fetchMessage(selectedUserId);
             }
-        }, 10000);
+        }, 1000);
+        // function fetchMessages(userId) {
+        //     $('.message-content-send').empty();
+        //     $('.message-content').empty();
+
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "{{ route('Adminsendmessage') }}",
+        //         data: {
+        //             id: userId,
+        //             _token: "{{ csrf_token() }}"
+        //         },
+        //         success: function(response) {
+        //             // console.log(response.data.allmessage);
+
+        //             $('.messages').empty();
+        //             response.data.allmessage.forEach(function(message) {
+        //                 const finalclass = (message.receiver_id == userId) ? 'received' :
+        //                     'sent';
+        //                 $('.messages').append(
+        //                     `<div class="message ${finalclass}">
+        //                     <div class="message-content">${message.message}</div>
+        //                 </div>`
+        //                 );
+        //             });
+        //         },
+        //         error: function(xhr) {
+        //             console.log(xhr.responseText);
+        //         }
+        //     });
+        // }
+
+        // setInterval(function() {
+        //     if (selectedUserId) {
+        //         fetchMessages(selectedUserId);
+        //     }
+        // }, 10000);
 
         $('.sendmsg').click(function() {
 
